@@ -65,23 +65,23 @@ def plot_data():
 root = tk.Tk()
 root.title("Linear Regression Predictor")
 
-root.geometry("300x400")
+root.geometry("300x300")
 root.resizable(False, False)  # Disable resizing the window
 
 # Creating an entry widget for user input
 label = tk.Label(root, text=f"Enter a value for {x_label}:")
-label.pack(pady=10)
+label.pack(pady=15)
 
 entry = tk.Entry(root)
-entry.pack(pady=10)
+entry.pack(pady=15)
 
 # Creating a button to trigger prediction
 predict_button = tk.Button(root, text="Predict", command=predict_value)
-predict_button.pack(pady=10)
+predict_button.pack(pady=15)
 
 # Creating a button to plot the data
 plot_button = tk.Button(root, text="Plot Data and Line", command=plot_data)
-plot_button.pack(pady=10)
+plot_button.pack(pady=15)
 
 # Running the GUI application
 root.mainloop()
