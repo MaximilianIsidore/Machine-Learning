@@ -1,87 +1,80 @@
-import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import tkinter as tk
-from tkinter import messagebox
 
-# Load data from CSV
-file_path = 'data.csv'  # Replace with your file path
-data = pd.read_csv(file_path)
+# Load data from a CSV or text file (assuming it's saved as 'data.txt' or 'data.csv')
+data = np.loadtxt('data.txt', delimiter=',')
 
-x_label = data.columns[0]  # First column
-y_label = data.columns[1]  # Second column
+# Separate features (X) and target (y)
+X = data[:, :-1]  # All columns except the last one (features)
+y = data[:, -1]   # Last column (house price)
 
-# Extract x and y values
-X = data[x_label].values
-Y = data[y_label].values
+m,n = X.shape
+epoch = 1000
+lr = 0.001
 
-# Number of data points
-N = len(X)
+#print("Features (X):\n", X[:5])  # Print first 5 rows
+#print("Target (y):\n", y[:5])
 
-# Calculate necessary sums
-sum_x = np.sum(X)
-sum_y = np.sum(Y)
-sum_xy = np.sum(X * Y)
-sum_x2 = np.sum(X ** 2)
+#print("X:", X[1] @ [1,2])
 
-# Calculate slope (m) and intercept (c)
-m = (N * sum_xy - sum_x * sum_y) / (N * sum_x2 - sum_x ** 2)
-c = (sum_y - m * sum_x) / N
 
-# Print the coefficients
-print(f"Slope (m): {m}")
-print(f"Intercept (c): {c}")
+def compute_gradient(X, y, w, b):
+    """
+    Computes the gradient for linear regression
+    Args:
+      X (ndarray (m,n)): Data, m examples with n features
+      y (ndarray (m,)) : target values
+      w (ndarray (n,)) : model parameters  
+      b (scalar)       : model parameter
+    Returns
+      dj_dw (ndarray Shape (n,)): The gradient of the cost w.r.t. the parameters w.
+      dj_db (scalar):             The gradient of the cost w.r.t. the parameter b.
+    """
+    m,n = X.shape           #(number of examples, number of features)
+    dj_dw = np.zeros((n,))
+    dj_db = 0.
 
-# Predict y values
+    for i in range(m):
+        err = (np.dot(X[i], w) + b) - y[i]
+        for j in range(n):
+            dj_dw[j] = dj_dw[j] + err * X[i,j]
+        dj_db = dj_db + err
+    dj_dw = dj_dw/m
+    dj_db = dj_db/m
+
+    return dj_dw,dj_db
+
+
+#set random weight and bias
+# np.random.seed(42)
+
+# Weight = np.random.rand(n)
+# Bias = np.random.rand()
+
+Weight = [100,100]
+Bias = 100
+
+# print(Weight)
+# print(Bias)
+
+# print(np.dot( [2.2, 3] , Weight) + Bias)
+
+#find gradient and update
+for i in range(epoch):
+    dw , db = compute_gradient(X,y, Weight, Bias)
+
+    Weight -= lr*dw
+    Bias -= lr*db
+
+print("weight:", Weight)
+print("Bias:", Bias)
+
 def predict(x):
-    return m * x + c
+    return np.dot(x , Weight) + Bias
 
-# GUI for user input
-def predict_value():
-    try:
-        # Get the value of X entered by the user
-        x_input = float(entry.get())
-        # Calculate the predicted Y
-        y_output = predict(x_input)
-        # Show the result in a message box
-        messagebox.showinfo("Prediction Result", f"For X = {x_input}, Predicted Y = {y_output}")
-    except ValueError:
-        # If the user inputs a non-numeric value
-        messagebox.showerror("Invalid Input", "Please enter a valid number.")
 
-# Plotting the data and regression line
-def plot_data():
-    predicted_Y = predict(X)
-    plt.scatter(X, Y, color='blue', label='Data Points')
-    plt.plot(X, predicted_Y, color='red', label='Fitted Line')
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
-    plt.title(f'Linear Regression: {x_label} vs {y_label}')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+print(f"The house price is {predict([2.4, 3])} thousand dollars")
 
-# Creating the GUI window
-root = tk.Tk()
-root.title("Linear Regression Predictor")
-
-root.geometry("300x300")
-root.resizable(False, False)  # Disable resizing the window
-
-# Creating an entry widget for user input
-label = tk.Label(root, text=f"Enter a value for {x_label}:")
-label.pack(pady=15)
-
-entry = tk.Entry(root)
-entry.pack(pady=15)
-
-# Creating a button to trigger prediction
-predict_button = tk.Button(root, text="Predict", command=predict_value)
-predict_button.pack(pady=15)
-
-# Creating a button to plot the data
-plot_button = tk.Button(root, text="Plot Data and Line", command=plot_data)
-plot_button.pack(pady=15)
-
-# Running the GUI application
-root.mainloop()
+# print("Any NaN in X?", np.isnan(X).sum())
+# print("Any NaN in y?", np.isnan(y).sum())
+# print("Any Inf in X?", np.isinf(X).sum())
+# print("Any Inf in y?", np.isinf(y).sum())
